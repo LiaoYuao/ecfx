@@ -1,0 +1,1530 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电子商务数据分析题库系统</title>
+<style>
+* {
+    box-sizing: border-box;
+    font-family: 'Microsoft YaHei', sans-serif;
+}
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f7fa;
+    color: #333;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+.progress-bar {
+    height: 6px;
+    background-color: #ecf0f1;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.progress {
+    height: 100%;
+    background-color: #3498db;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+.question-container {
+    margin-bottom: 30px;
+}
+.question {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+.options {
+    margin-left: 20px;
+}
+.option {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.option:hover {
+    background-color: #e9ecef;
+}
+.option.selected {
+    background-color: #d4edff;
+    border-left: 4px solid #3498db;
+}
+.option.correct {
+    background-color: #d4edda;
+    border-left: 4px solid #2ecc71;
+}
+.option.incorrect {
+    background-color: #f8d7da;
+    border-left: 4px solid #e74c3c;
+}
+.explanation {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    display: none;
+}
+.explanation.show {
+    display: block;
+}
+.explanation-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #3498db;
+}
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+.btn:hover {
+    background-color: #2980b9;
+}
+.btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+.btn-container {
+    text-align: right;
+    margin-top: 15px;
+}
+.btn-container.multiple {
+    display: flex;
+    justify-content: space-between;
+}
+.confirm-btn {
+    background-color: #27ae60;
+}
+.confirm-btn:hover {
+    background-color: #219653;
+}
+.score-container {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 20px;
+    display: none;
+}
+.score-container.show {
+    display: block;
+}
+.result {
+    font-weight: bold;
+    color: #2ecc71;
+}
+.stats {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #7f8c8d;
+}
+.restart-btn {
+    background-color: #e74c3c;
+    margin-top: 20px;
+}
+.restart-btn:hover {
+    background-color: #c0392b;
+}
+.copyright {
+    text-align: center;
+    margin-top: 30px;
+    color: #7f8c8d;
+    font-size: 14px;
+    padding: 10px 0;
+    border-top: 1px solid #ecf0f1;
+}
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    .question {
+        font-size: 16px;
+    }
+    .option {
+        padding: 8px;
+    }
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>电子商务数据分析题库系统</h1>
+    <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+    </div>
+    <div class="stats">
+        当前进度: <span id="current-question">1</span>/<span id="total-questions">100</span> |
+        得分: <span id="current-score">0</span>
+    </div>
+    <div class="question-container" id="question-container">
+        <!-- 问题将在这里动态生成 -->
+    </div>
+    <div class="btn-container" id="btn-container">
+        <button class="btn" id="next-btn" disabled>下一题</button>
+    </div>
+    <div class="score-container" id="score-container">
+        <p>测验完成！您的最终得分是：<span class="result" id="score">0</span>/<span id="total">100</span></p>
+        <button class="btn restart-btn" id="restart-btn">重新答题</button>
+    </div>
+	<div class="copyright">
+    作者：廖宇奥 &copy; <br>
+    Author: Liao Yu'ao &copy;
+</div>
+</div>
+<script>
+    // 题目数据 - 基于文档内容设计的100道题目
+    const originalQuestions = [
+        // 电子商务数据基础知识 [doc_19]
+        {
+            type: 'single',
+            question: "1. 电子商务数据主要分为哪两大类？",
+            options: [
+                "行为数据和商业数据",
+                "市场数据和运营数据",
+                "客户数据和产品数据",
+                "内部数据和外部数据"
+            ],
+            answer: [0],
+            explanation: "电子商务数据包括行为数据（反映用户行为特征）和商业数据（体现企业运营状况）两大类。[doc_19]"
+        },
+        {
+            type: 'single',
+            question: "2. 下列哪项不属于电子商务数据分析的主要作用？",
+            options: [
+                "辅助企业做出科学决策",
+                "降低运营成本",
+                "增强市场竞争力",
+                "直接提高产品价格"
+            ],
+            answer: [3],
+            explanation: "电子商务数据分析的主要作用包括辅助决策、降低成本和增强竞争力，但不能直接提高产品价格。[doc_19]"
+        },
+        {
+            type: 'multiple',
+            question: "3. 电子商务数据分析的应用场景包括哪些？（多选）",
+            options: [
+                "流量分析",
+                "客户分析",
+                "产品分析",
+                "供应链分析"
+            ],
+            answer: [0, 1, 2],
+            explanation: "电子商务数据分析的应用场景主要包括流量分析、客户分析和产品分析等。[doc_19]"
+        },
+        {
+            type: 'judge',
+            question: "4. 奥雪公司通过分析冰淇淋市场的人群画像，成功推出了爆款产品。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。案例中奥雪公司通过分析消费者偏好变化，特别是年轻一代的需求，成功推出了爆款产品。[doc_19]"
+        },
+        
+        // 数据分析指标 [doc_18]
+        {
+            type: 'single',
+            question: "5. 下列哪项指标最能反映客户的忠诚度？",
+            options: [
+                "注册客户数",
+                "活跃客户比率",
+                "重复购买率",
+                "客单价"
+            ],
+            answer: [2],
+            explanation: "重复购买率最能反映客户的忠诚度，表示客户再次购买的比例。[doc_18]"
+        },
+        {
+            type: 'single',
+            question: "6. 评估推广活动效果时，下列哪个指标最重要？",
+            options: [
+                "展现量",
+                "点击量",
+                "点击率",
+                "注册转化率"
+            ],
+            answer: [3],
+            explanation: "注册转化率最能反映推广活动的实际效果，表示从展示到实际注册的转化情况。[doc_18]"
+        },
+        {
+            type: 'multiple',
+            question: "7. 下列哪些属于供应链指标？（多选）",
+            options: [
+                "库存周转率",
+                "采购数量",
+                "客单价",
+                "订单满足率"
+            ],
+            answer: [0, 1, 3],
+            explanation: "供应链指标包括库存周转率、采购数量和订单满足率等，客单价属于销售指标。[doc_18]"
+        },
+        {
+            type: 'judge',
+            question: "8. 商品访客数和商品浏览量是评估产品表现的重要指标。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。商品访客数和浏览量是重要的产品指标，反映产品的受欢迎程度。[doc_18]"
+        },
+        
+        // 数据分析流程 [doc_17]
+        {
+            type: 'single',
+            question: "9. 电子商务数据分析的第一步是什么？",
+            options: [
+                "数据采集",
+                "明确分析目标",
+                "数据处理",
+                "数据展现"
+            ],
+            answer: [1],
+            explanation: "数据分析的第一步是明确分析目标，根据商业需求设定具体、可衡量的目标。[doc_17]"
+        },
+        {
+            type: 'single',
+            question: "10. 下列哪项不属于数据处理的内容？",
+            options: [
+                "数据清洗",
+                "数据转换",
+                "数据展现",
+                "数据计算"
+            ],
+            answer: [2],
+            explanation: "数据展现是单独的步骤，不属于数据处理的内容。数据处理包括清洗、转换和计算等。[doc_17]"
+        },
+        {
+            type: 'multiple',
+            question: "11. 数据分析报告应包含哪些部分？（多选）",
+            options: [
+                "标题页",
+                "前言页",
+                "目录页",
+                "正文和总结"
+            ],
+            answer: [0, 1, 2, 3],
+            explanation: "完整的数据分析报告应包括标题页、前言页、目录页、正文和总结部分。[doc_17]"
+        },
+        {
+            type: 'judge',
+            question: "12. 《中华人民共和国电子商务法》对大数据杀熟行为有明确规定。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。《电子商务法》对大数据杀熟等行为有明确规定，强调个人信息保护。[doc_17]"
+        },
+        
+        // 数据采集 [doc_16]
+        {
+            type: 'single',
+            question: "13. 数据采集的首要原则是什么？",
+            options: [
+                "及时性",
+                "准确性",
+                "合法性",
+                "有效性"
+            ],
+            answer: [2],
+            explanation: "数据采集的首要原则是合法性，只能采集公开或经同意的数据。[doc_16]"
+        },
+        {
+            type: 'single',
+            question: "14. 下列哪种数据采集方法最适合了解用户需求？",
+            options: [
+                "网页数据采集",
+                "系统日志采集",
+                "调查问卷",
+                "数据库采集"
+            ],
+            answer: [2],
+            explanation: "调查问卷最适合了解用户需求，可以直接获取用户的意见和反馈。[doc_16]"
+        },
+        {
+            type: 'multiple',
+            question: "15. 数据采集的步骤包括哪些？（多选）",
+            options: [
+                "确定采集范围",
+                "建立数据指标规范",
+                "进行数据检查",
+                "直接发布报告"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据采集步骤包括确定范围、建立规范和进行检查，不包括直接发布报告。[doc_16]"
+        },
+        {
+            type: 'judge',
+            question: "16. 窜货低价销售问题可以通过合法数据采集和分析来解决。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。案例中通过合法采集电商平台数据，分析后筛选低价店铺，解决了窜货问题。[doc_16]"
+        },
+        
+        // 数据采集工具 [doc_15]
+        {
+            type: 'single',
+            question: "17. 淘宝官方提供的数据分析平台是什么？",
+            options: [
+                "店侦探",
+                "生意参谋",
+                "京东商智",
+                "八爪鱼采集器"
+            ],
+            answer: [1],
+            explanation: "生意参谋是淘宝官方提供的网店数据分析平台。[doc_15]"
+        },
+        {
+            type: 'single',
+            question: "18. 下列哪种工具最适合采集竞争对手的商品信息？",
+            options: [
+                "生意参谋",
+                "店侦探",
+                "京东商智",
+                "火车采集器"
+            ],
+            answer: [1],
+            explanation: "店侦探是专门针对淘宝和天猫卖家的工具，适合采集竞争对手信息。[doc_15]"
+        },
+        {
+            type: 'multiple',
+            question: "19. 常用的数据采集工具有哪些？（多选）",
+            options: [
+                "生意参谋",
+                "店侦探",
+                "八爪鱼采集器",
+                "Excel"
+            ],
+            answer: [0, 1, 2],
+            explanation: "常用数据采集工具包括生意参谋、店侦探和八爪鱼采集器等，Excel是分析工具。[doc_15]"
+        },
+        {
+            type: 'judge',
+            question: "20. 京东商智是京东为第三方商家提供的数据服务平台。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。京东商智是京东为第三方商家提供的数据服务平台。[doc_15]"
+        },
+        
+        // 市场数据采集 [doc_14]
+        {
+            type: 'single',
+            question: "21. 行业总销售额数据通常从哪里获取？",
+            options: [
+                "国家统计局",
+                "淘宝后台",
+                "企业ERP系统",
+                "客户调查"
+            ],
+            answer: [0],
+            explanation: "行业总销售额数据通常来自国家统计局、行业协会等官方渠道。[doc_14]"
+        },
+        {
+            type: 'single',
+            question: "22. 市场需求变化可以通过分析哪个指标来把握？",
+            options: [
+                "行业销售量",
+                "用户搜索指数",
+                "竞争对手销售额",
+                "客户地域分布"
+            ],
+            answer: [1],
+            explanation: "用户搜索指数的变化趋势可以反映市场需求的变化。[doc_14]"
+        },
+        {
+            type: 'multiple',
+            question: "23. 竞争数据采集包括哪些内容？（多选）",
+            options: [
+                "商品结构",
+                "销量",
+                "活动信息",
+                "店铺流量"
+            ],
+            answer: [0, 1, 2, 3],
+            explanation: "竞争数据采集包括商品结构、销量、活动信息和店铺流量等多个维度。[doc_14]"
+        },
+        {
+            type: 'judge',
+            question: "24. 生鲜零售市场规模每年增加超过3000万亿元。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。案例中提到生鲜零售市场规模每年增加超过3000万亿元。[doc_14]"
+        },
+        
+        // 运营数据采集 [doc_13]
+        {
+            type: 'single',
+            question: "25. 客户画像数据不包括以下哪项？",
+            options: [
+                "年龄分布",
+                "性别占比",
+                "库存周转率",
+                "地域分布"
+            ],
+            answer: [2],
+            explanation: "库存周转率是供应链指标，不属于客户画像数据。[doc_13]"
+        },
+        {
+            type: 'single',
+            question: "26. 淘宝网中可以在哪个板块获取商品浏览量数据？",
+            options: [
+                "交易管理",
+                "商品360",
+                "服务洞察",
+                "直通车"
+            ],
+            answer: [1],
+            explanation: "淘宝网生意参谋的'商品360'板块可以获取商品浏览量等数据。[doc_13]"
+        },
+        {
+            type: 'multiple',
+            question: "27. 运营数据采集包括哪些类型？（多选）",
+            options: [
+                "客户数据",
+                "推广数据",
+                "销售数据",
+                "供应链数据"
+            ],
+            answer: [0, 1, 2, 3],
+            explanation: "运营数据采集包括客户数据、推广数据、销售数据和供应链数据。[doc_13]"
+        },
+        {
+            type: 'judge',
+            question: "28. 店铺设计风格与目标消费群体不符可能影响业绩。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。案例中发现店铺客户画像与行业主力消费人群存在差异，推测设计风格可能影响业绩。[doc_13]"
+        },
+        
+        // 产品数据采集 [doc_12]
+        {
+            type: 'single',
+            question: "29. 产品搜索指数反映什么？",
+            options: [
+                "产品交易量",
+                "用户关注度",
+                "库存水平",
+                "生产成本"
+            ],
+            answer: [1],
+            explanation: "产品搜索指数反映用户关注度和兴趣度。[doc_12]"
+        },
+        {
+            type: 'single',
+            question: "30. 下列哪项是产品盈利能力指标？",
+            options: [
+                "客单件",
+                "毛利率",
+                "收藏量",
+                "关注量"
+            ],
+            answer: [1],
+            explanation: "毛利率是产品盈利能力的重要指标。[doc_12]"
+        },
+        {
+            type: 'multiple',
+            question: "31. 产品数据采集渠道包括哪些？（多选）",
+            options: [
+                "电商平台后台",
+                "ERP系统",
+                "百度指数",
+                "国家统计局"
+            ],
+            answer: [0, 1, 2],
+            explanation: "产品数据可以从电商平台后台、ERP系统和百度指数等渠道获取。[doc_12]"
+        },
+        {
+            type: 'judge',
+            question: "32. 临潼石榴的销售具有明显的季节性特征。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。案例中通过百度指数发现临潼石榴具有明显的季节性。[doc_12]"
+        },
+        
+        // 数据分类与处理 [doc_11]
+        {
+            type: 'single',
+            question: "33. 下列哪项不属于数据分类的主要目的？",
+            options: [
+                "提高数据检索效率",
+                "便于数据分析",
+                "增加数据存储空间",
+                "优化数据管理"
+            ],
+            answer: [2],
+            explanation: "数据分类的主要目的是提高检索效率、便于分析和优化管理，而不是增加存储空间。[doc_11]"
+        },
+        {
+            type: 'single',
+            question: "34. 结构化数据通常存储在什么中？",
+            options: [
+                "文本文件",
+                "关系型数据库",
+                "图片文件",
+                "视频文件"
+            ],
+            answer: [1],
+            explanation: "结构化数据通常存储在关系型数据库中，如MySQL、Oracle等。[doc_11]"
+        },
+        {
+            type: 'multiple',
+            question: "35. 数据分类的方法包括哪些？（多选）",
+            options: [
+                "按数据结构分类",
+                "按数据来源分类",
+                "按数据用途分类",
+                "按数据颜色分类"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据分类方法包括按结构、来源和用途分类，颜色不是分类依据。[doc_11]"
+        },
+        {
+            type: 'judge',
+            question: "36. 半结构化数据既包含结构化特征，也包含非结构化特征。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。半结构化数据如XML、JSON等，既有结构化特征，也包含非结构化特征。[doc_11]"
+        },
+        
+        // 数据清洗 [doc_10]
+        {
+            type: 'single',
+            question: "37. 数据清洗的主要目的是什么？",
+            options: [
+                "提高数据质量",
+                "增加数据量",
+                "改变数据结构",
+                "删除所有数据"
+            ],
+            answer: [0],
+            explanation: "数据清洗的主要目的是提高数据质量，确保数据准确性和一致性。[doc_10]"
+        },
+        {
+            type: 'single',
+            question: "38. 下列哪项不属于常见的数据质量问题？",
+            options: [
+                "数据重复",
+                "数据缺失",
+                "数据格式一致",
+                "数据异常"
+            ],
+            answer: [2],
+            explanation: "数据格式一致是高质量数据的特征，不属于数据质量问题。[doc_10]"
+        },
+        {
+            type: 'multiple',
+            question: "39. 数据清洗的步骤包括哪些？（多选）",
+            options: [
+                "缺失值处理",
+                "异常值处理",
+                "数据转换",
+                "数据删除"
+            ],
+            answer: [0, 1, 2, 3],
+            explanation: "数据清洗包括缺失值处理、异常值处理、数据转换和数据删除等步骤。[doc_10]"
+        },
+        {
+            type: 'judge',
+            question: "40. 数据清洗可以完全消除所有数据问题。",
+            options: ["正确", "错误"],
+            answer: [1],
+            explanation: "错误。数据清洗可以大幅提高数据质量，但无法完全消除所有问题。[doc_10]"
+        },
+        
+        // 数据转换 [doc_9]
+        {
+            type: 'single',
+            question: "41. 数据标准化处理的目的是什么？",
+            options: [
+                "消除量纲影响",
+                "增加数据量",
+                "改变数据类型",
+                "删除异常数据"
+            ],
+            answer: [0],
+            explanation: "数据标准化处理的目的是消除不同指标量纲的影响。[doc_9]"
+        },
+        {
+            type: 'single',
+            question: "42. 下列哪种方法不属于数据转换技术？",
+            options: [
+                "数据归一化",
+                "数据离散化",
+                "数据复制",
+                "数据聚合"
+            ],
+            answer: [2],
+            explanation: "数据复制不属于数据转换技术，其他选项都是常见的数据转换方法。[doc_9]"
+        },
+        {
+            type: 'multiple',
+            question: "43. 数据转换的应用场景包括哪些？（多选）",
+            options: [
+                "数据挖掘前处理",
+                "数据可视化前处理",
+                "数据存储前处理",
+                "数据删除前处理"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据转换常用于数据挖掘、可视化和存储前的处理，不用于数据删除。[doc_9]"
+        },
+        {
+            type: 'judge',
+            question: "44. 数据离散化是将连续型数据转换为离散型数据的过程。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。数据离散化是将连续型数据转换为离散型数据的过程。[doc_9]"
+        },
+        
+        // 数据计算 [doc_8]
+        {
+            type: 'single',
+            question: "45. 下列哪项不是常用的数据计算工具？",
+            options: [
+                "Excel",
+                "Python",
+                "Photoshop",
+                "R语言"
+            ],
+            answer: [2],
+            explanation: "Photoshop是图像处理软件，不是数据计算工具。[doc_8]"
+        },
+        {
+            type: 'single',
+            question: "46. 数据透视表的主要功能是什么？",
+            options: [
+                "数据分组汇总",
+                "数据清洗",
+                "数据采集",
+                "数据可视化"
+            ],
+            answer: [0],
+            explanation: "数据透视表的主要功能是对数据进行分组汇总和分析。[doc_8]"
+        },
+        {
+            type: 'multiple',
+            question: "47. 数据计算的内容包括哪些？（多选）",
+            options: [
+                "指标计算",
+                "模型计算",
+                "预测计算",
+                "数据删除"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据计算包括指标计算、模型计算和预测计算等，不包括数据删除。[doc_8]"
+        },
+        {
+            type: 'judge',
+            question: "48. Excel的函数功能可以完成大部分基础数据计算需求。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。Excel的函数功能强大，可以完成大部分基础数据计算需求。[doc_8]"
+        },
+        
+        // 数据表处理 [doc_7]
+        {
+            type: 'single',
+            question: "49. 下列哪项不是数据表的基本操作？",
+            options: [
+                "表连接",
+                "表排序",
+                "表删除",
+                "表合并"
+            ],
+            answer: [2],
+            explanation: "表删除不是数据表的基本操作，其他选项都是常见的数据表操作。[doc_7]"
+        },
+        {
+            type: 'single',
+            question: "50. VLOOKUP函数的主要功能是什么？",
+            options: [
+                "垂直查找数据",
+                "水平查找数据",
+                "计算平均值",
+                "统计数量"
+            ],
+            answer: [0],
+            explanation: "VLOOKUP函数用于垂直查找数据，即按列查找。[doc_7]"
+        },
+        {
+            type: 'multiple',
+            question: "51. 数据表处理的内容包括哪些？（多选）",
+            options: [
+                "数据筛选",
+                "数据排序",
+                "数据分组",
+                "数据删除"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据表处理包括数据筛选、排序和分组等操作，不包括数据删除。[doc_7]"
+        },
+        {
+            type: 'judge',
+            question: "52. 数据透视表可以同时实现数据分组和汇总计算。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。数据透视表可以同时实现数据分组和汇总计算。[doc_7]"
+        },
+        
+        // 数据可视化基础 [doc_6]
+        {
+            type: 'single',
+            question: "53. 数据可视化的主要目的是什么？",
+            options: [
+                "直观展示数据",
+                "增加数据量",
+                "改变数据结构",
+                "删除异常数据"
+            ],
+            answer: [0],
+            explanation: "数据可视化的主要目的是直观展示数据，便于理解和分析。[doc_6]"
+        },
+        {
+            type: 'single',
+            question: "54. 下列哪种图表最适合展示趋势变化？",
+            options: [
+                "饼图",
+                "柱状图",
+                "折线图",
+                "散点图"
+            ],
+            answer: [2],
+            explanation: "折线图最适合展示数据随时间变化的趋势。[doc_6]"
+        },
+        {
+            type: 'multiple',
+            question: "55. 数据可视化的基本原则包括哪些？（多选）",
+            options: [
+                "准确性",
+                "简洁性",
+                "美观性",
+                "复杂性"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据可视化应遵循准确、简洁和美观的原则，不应过于复杂。[doc_6]"
+        },
+        {
+            type: 'judge',
+            question: "56. 数据可视化可以完全替代数据分析。",
+            options: ["正确", "错误"],
+            answer: [1],
+            explanation: "错误。数据可视化是分析结果的展示方式，不能完全替代数据分析过程。[doc_6]"
+        },
+        
+        // 图表类型选择 [doc_5]
+        {
+            type: 'single',
+            question: "57. 展示部分与整体关系时，最适合使用哪种图表？",
+            options: [
+                "柱状图",
+                "饼图",
+                "折线图",
+                "雷达图"
+            ],
+            answer: [1],
+            explanation: "饼图最适合展示部分与整体的比例关系。[doc_5]"
+        },
+        {
+            type: 'single',
+            question: "58. 下列哪种图表可以展示多维数据？",
+            options: [
+                "柱状图",
+                "散点图",
+                "雷达图",
+                "折线图"
+            ],
+            answer: [2],
+            explanation: "雷达图可以同时展示多个维度的数据。[doc_5]"
+        },
+        {
+            type: 'multiple',
+            question: "59. 选择图表类型时应考虑哪些因素？（多选）",
+            options: [
+                "数据特征",
+                "分析目的",
+                "观众背景",
+                "个人喜好"
+            ],
+            answer: [0, 1, 2],
+            explanation: "选择图表类型应考虑数据特征、分析目的和观众背景，个人喜好不是主要因素。[doc_5]"
+        },
+        {
+            type: 'judge',
+            question: "60. 散点图适合展示两个变量之间的相关性。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。散点图适合展示两个变量之间的相关关系。[doc_5]"
+        },
+        
+        // 图表制作与美化 [doc_4]
+        {
+            type: 'single',
+            question: "61. 图表标题的设置原则是什么？",
+            options: [
+                "越长越好",
+                "切中主题",
+                "使用专业术语",
+                "包含所有数据"
+            ],
+            answer: [1],
+            explanation: "图表标题应切中主题，简明扼要地概括图表内容。[doc_4]"
+        },
+        {
+            type: 'single',
+            question: "62. 图表美化的基本原则是什么？",
+            options: [
+                "最大化数据墨水比",
+                "使用多种颜色",
+                "添加复杂背景",
+                "减少数据展示"
+            ],
+            answer: [0],
+            explanation: "图表美化的基本原则是最大化数据墨水比，突出数据本身。[doc_4]"
+        },
+        {
+            type: 'multiple',
+            question: "63. 图表制作的基本元素包括哪些？（多选）",
+            options: [
+                "标题",
+                "图例",
+                "单位",
+                "资料来源"
+            ],
+            answer: [0, 1, 2, 3],
+            explanation: "完整的图表应包括标题、图例、单位和资料来源等基本元素。[doc_4]"
+        },
+        {
+            type: 'judge',
+            question: "64. Y轴刻度一般应从0开始。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。Y轴刻度一般应从0开始，避免误导读者。[doc_4]"
+        },
+        
+        // 数据报告撰写 [doc_3]
+        {
+            type: 'single',
+            question: "65. 数据分析报告的核心部分是什么？",
+            options: [
+                "标题页",
+                "前言",
+                "正文分析",
+                "附录"
+            ],
+            answer: [2],
+            explanation: "正文分析部分是报告的核心，包含主要分析内容和结论。[doc_3]"
+        },
+        {
+            type: 'single',
+            question: "66. 数据分析报告的前言部分通常不包括什么？",
+            options: [
+                "分析背景",
+                "分析目的",
+                "详细数据",
+                "分析方法"
+            ],
+            answer: [2],
+            explanation: "前言部分包括背景、目的和方法，但不包含详细数据。[doc_3]"
+        },
+        {
+            type: 'multiple',
+            question: "67. 优秀数据分析报告的特点包括哪些？（多选）",
+            options: [
+                "结构清晰",
+                "数据准确",
+                "结论明确",
+                "篇幅冗长"
+            ],
+            answer: [0, 1, 2],
+            explanation: "优秀报告应结构清晰、数据准确、结论明确，不应篇幅冗长。[doc_3]"
+        },
+        {
+            type: 'judge',
+            question: "68. 数据分析报告的结论部分应提出具体可行的建议。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。结论部分应基于分析结果提出具体可行的建议。[doc_3]"
+        },
+        
+        // 数据报告呈现 [doc_2]
+        {
+            type: 'single',
+            question: "69. 数据报告呈现时，下列哪项最重要？",
+            options: [
+                "数据量",
+                "逻辑性",
+                "颜色数量",
+                "动画效果"
+            ],
+            answer: [1],
+            explanation: "数据报告呈现时，逻辑性和条理性最为重要。[doc_2]"
+        },
+        {
+            type: 'single',
+            question: "70. 下列哪种方式不适合呈现数据分析报告？",
+            options: [
+                "PPT演示",
+                "Word文档",
+                "Excel表格",
+                "视频动画"
+            ],
+            answer: [3],
+            explanation: "视频动画不适合呈现详细的数据分析报告。[doc_2]"
+        },
+        {
+            type: 'multiple',
+            question: "71. 数据报告呈现的技巧包括哪些？（多选）",
+            options: [
+                "突出重点",
+                "使用可视化图表",
+                "控制节奏",
+                "展示所有数据"
+            ],
+            answer: [0, 1, 2],
+            explanation: "报告呈现应突出重点、使用可视化图表并控制节奏，不应展示所有数据。[doc_2]"
+        },
+        {
+            type: 'judge',
+            question: "72. 数据报告呈现时应根据受众调整内容和形式。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。应根据受众的专业背景和需求调整报告内容和形式。[doc_2]"
+        },
+        
+        // 数据应用案例 [doc_1]
+        {
+            type: 'single',
+            question: "73. 奥雪公司通过分析什么数据推出了爆款产品？",
+            options: [
+                "生产成本",
+                "消费者偏好",
+                "竞争对手价格",
+                "物流成本"
+            ],
+            answer: [1],
+            explanation: "奥雪公司通过分析消费者偏好变化，特别是年轻一代的需求，推出了爆款产品。[doc_1]"
+        },
+        {
+            type: 'single',
+            question: "74. 临潼石榴的销售具有什么特征？",
+            options: [
+                "全年稳定",
+                "季节性明显",
+                "不受季节影响",
+                "冬季最旺"
+            ],
+            answer: [1],
+            explanation: "通过百度指数分析发现临潼石榴的销售具有明显的季节性特征。[doc_1]"
+        },
+        {
+            type: 'multiple',
+            question: "75. 数据分析在电商中的应用包括哪些？（多选）",
+            options: [
+                "选品决策",
+                "营销策略",
+                "库存管理",
+                "人事招聘"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据分析在电商中应用于选品、营销和库存管理等方面，不直接用于人事招聘。[doc_1]"
+        },
+        {
+            type: 'judge',
+            question: "76. 窜货低价销售问题可以通过数据分析来解决。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。案例中通过采集电商平台数据，分析后筛选低价店铺，解决了窜货问题。[doc_1]"
+        },
+        
+        // 数据伦理与法律 [doc_0]
+        {
+            type: 'single',
+            question: "77. 下列哪项行为违反数据伦理？",
+            options: [
+                "匿名化处理数据",
+                "获取用户同意后采集数据",
+                "大数据杀熟",
+                "依法使用数据"
+            ],
+            answer: [2],
+            explanation: "大数据杀熟是利用数据优势对用户进行差别定价，违反数据伦理。[doc_0]"
+        },
+        {
+            type: 'single',
+            question: "78. 《中华人民共和国电子商务法》实施于哪一年？",
+            options: [
+                "2016年",
+                "2017年",
+                "2018年",
+                "2019年"
+            ],
+            answer: [3],
+            explanation: "《中华人民共和国电子商务法》自2019年1月1日起施行。[doc_0]"
+        },
+        {
+            type: 'multiple',
+            question: "79. 数据采集时应遵守哪些原则？（多选）",
+            options: [
+                "合法性",
+                "最小必要",
+                "公开透明",
+                "越多越好"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据采集应遵守合法、最小必要和公开透明原则，不是越多越好。[doc_0]"
+        },
+        {
+            type: 'judge',
+            question: "80. 企业可以未经用户同意收集其个人信息。",
+            options: ["正确", "错误"],
+            answer: [1],
+            explanation: "错误。《电子商务法》规定收集用户信息应取得同意。[doc_0]"
+        },
+        
+        // 补充题目
+        {
+            type: 'single',
+            question: "81. 下列哪项指标最能反映网站的实际效果？",
+            options: [
+                "访问量",
+                "转化率",
+                "跳出率",
+                "页面停留时间"
+            ],
+            answer: [1],
+            explanation: "转化率最能反映网站的实际效果，表示从访问到实际转化的比例。"
+        },
+        {
+            type: 'single',
+            question: "82. RFM模型中的R代表什么？",
+            options: [
+                "最近购买时间",
+                "购买频率",
+                "消费金额",
+                "回购意愿"
+            ],
+            answer: [0],
+            explanation: "RFM模型中R(Recency)代表最近一次购买时间。"
+        },
+        {
+            type: 'multiple',
+            question: "83. 常用的数据可视化工具包括哪些？（多选）",
+            options: [
+                "Tableau",
+                "Power BI",
+                "Excel",
+                "Photoshop"
+            ],
+            answer: [0, 1, 2],
+            explanation: "Tableau、Power BI和Excel都是常用的数据可视化工具，Photoshop不是。"
+        },
+        {
+            type: 'judge',
+            question: "84. 热力图适合展示网页点击分布情况。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。热力图非常适合展示网页上用户的点击分布情况。"
+        },
+        {
+            type: 'single',
+            question: "85. 漏斗分析主要用于分析什么？",
+            options: [
+                "用户转化路径",
+                "产品销售分布",
+                "客户地域分布",
+                "库存周转情况"
+            ],
+            answer: [0],
+            explanation: "漏斗分析主要用于分析用户从进入网站到最终转化的路径和流失情况。"
+        },
+        {
+            type: 'single',
+            question: "86. 下列哪种图表最适合展示多个变量的相关性？",
+            options: [
+                "饼图",
+                "散点图矩阵",
+                "折线图",
+                "柱状图"
+            ],
+            answer: [1],
+            explanation: "散点图矩阵可以同时展示多个变量两两之间的相关关系。"
+        },
+        {
+            type: 'multiple',
+            question: "87. 电商数据分析的常见模型包括哪些？（多选）",
+            options: [
+                "AARRR模型",
+                "RFM模型",
+                "漏斗模型",
+                "线性回归模型"
+            ],
+            answer: [0, 1, 2],
+            explanation: "AARRR、RFM和漏斗模型都是电商常用分析模型，线性回归是通用统计方法。"
+        },
+        {
+            type: 'judge',
+            question: "88. 数据中台是企业数字化转型的重要基础设施。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。数据中台整合企业数据资源，是数字化转型的重要基础设施。"
+        },
+        {
+            type: 'single',
+            question: "89. 下列哪项不属于用户行为数据？",
+            options: [
+                "点击流",
+                "停留时长",
+                "购买记录",
+                "库存数量"
+            ],
+            answer: [3],
+            explanation: "库存数量是运营数据，不属于用户行为数据。"
+        },
+        {
+            type: 'single',
+            question: "90. 聚类分析常用于什么场景？",
+            options: [
+                "用户分群",
+                "预测销量",
+                "关联分析",
+                "异常检测"
+            ],
+            answer: [0],
+            explanation: "聚类分析常用于用户分群，将相似特征的用户归为一类。"
+        },
+        {
+            type: 'multiple',
+            question: "91. 数据质量评估指标包括哪些？（多选）",
+            options: [
+                "准确性",
+                "完整性",
+                "及时性",
+                "颜色鲜艳度"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据质量评估指标包括准确性、完整性和及时性等，颜色不是评估标准。"
+        },
+        {
+            type: 'judge',
+            question: "92. 数据湖可以存储结构化、半结构化和非结构化数据。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。数据湖可以存储各种类型的数据，包括结构化、半结构化和非结构化数据。"
+        },
+        {
+            type: 'single',
+            question: "93. 下列哪项技术最适合处理实时数据流？",
+            options: [
+                "Hadoop",
+                "Spark Streaming",
+                "MySQL",
+                "Excel"
+            ],
+            answer: [1],
+            explanation: "Spark Streaming是专门用于处理实时数据流的技术。"
+        },
+        {
+            type: 'single',
+            question: "94. 关联规则挖掘最著名的算法是什么？",
+            options: [
+                "Apriori",
+                "K-means",
+                "决策树",
+                "神经网络"
+            ],
+            answer: [0],
+            explanation: "Apriori算法是关联规则挖掘中最著名的算法。"
+        },
+        {
+            type: 'multiple',
+            question: "95. 电商平台常用的推荐算法包括哪些？（多选）",
+            options: [
+                "协同过滤",
+                "内容推荐",
+                "热门推荐",
+                "随机推荐"
+            ],
+            answer: [0, 1, 2],
+            explanation: "电商平台常用协同过滤、内容推荐和热门推荐等算法，随机推荐效果较差。"
+        },
+        {
+            type: 'judge',
+            question: "96. 用户画像可以帮助企业实现精准营销。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。用户画像可以帮助企业更好地理解用户需求，实现精准营销。"
+        },
+        {
+            type: 'single',
+            question: "97. 下列哪项不是数据预处理的内容？",
+            options: [
+                "数据清洗",
+                "数据集成",
+                "数据可视化",
+                "数据规约"
+            ],
+            answer: [2],
+            explanation: "数据可视化是分析后的步骤，不属于数据预处理。"
+        },
+        {
+            type: 'single',
+            question: "98. 时间序列分析最适合预测什么？",
+            options: [
+                "用户偏好",
+                "产品销量",
+                "客户满意度",
+                "库存周转率"
+            ],
+            answer: [1],
+            explanation: "时间序列分析最适合预测具有时间规律的数据，如产品销量。"
+        },
+        {
+            type: 'multiple',
+            question: "99. 数据安全措施包括哪些？（多选）",
+            options: [
+                "数据加密",
+                "访问控制",
+                "数据备份",
+                "数据公开"
+            ],
+            answer: [0, 1, 2],
+            explanation: "数据安全措施包括加密、访问控制和备份等，数据公开不是安全措施。"
+        },
+        {
+            type: 'judge',
+            question: "100. 数据治理是确保数据质量和安全的重要工作。",
+            options: ["正确", "错误"],
+            answer: [0],
+            explanation: "正确。数据治理通过建立规范和流程，确保数据质量和安全。"
+        }
+    ];
+
+    // 初始化变量
+    let currentQuestion = 0;
+    let score = 0;
+    let selectedOptions = [];
+    let isAnswerChecked = false;
+    let totalQuestions = originalQuestions.length;
+    let questions = [...originalQuestions]; // 创建题目数组的副本
+
+    // DOM元素
+    const questionContainer = document.getElementById('question-container');
+    const btnContainer = document.getElementById('btn-container');
+    const progressBar = document.getElementById('progress');
+    const scoreContainer = document.getElementById('score-container');
+    const scoreDisplay = document.getElementById('score');
+    const totalDisplay = document.getElementById('total');
+    const currentQuestionDisplay = document.getElementById('current-question');
+    const totalQuestionsDisplay = document.getElementById('total-questions');
+    const currentScoreDisplay = document.getElementById('current-score');
+    const restartBtn = document.getElementById('restart-btn');
+
+    // 初始化显示
+    function initQuiz() {
+        // 随机排序题目
+        questions = [...originalQuestions].sort(() => Math.random() - 0.5);
+        currentQuestion = 0;
+        score = 0;
+        selectedOptions = [];
+        isAnswerChecked = false;
+        totalQuestions = questions.length;
+        
+        totalQuestionsDisplay.textContent = totalQuestions;
+        currentQuestionDisplay.textContent = currentQuestion + 1;
+        currentScoreDisplay.textContent = score;
+        
+        // 显示第一题
+        questionContainer.style.display = 'block';
+        btnContainer.style.display = 'block';
+        scoreContainer.classList.remove('show');
+        displayQuestion();
+    }
+
+    // 显示当前问题
+    function displayQuestion() {
+        const question = questions[currentQuestion];
+        progressBar.style.width = `${((currentQuestion + 1) / totalQuestions) * 100}%`;
+        currentQuestionDisplay.textContent = currentQuestion + 1;
+        currentScoreDisplay.textContent = score;
+        
+        let html = `<div class="question">${question.question}</div><div class="options">`;
+        
+        question.options.forEach((option, index) => {
+            const isSelected = selectedOptions.includes(index);
+            const isCorrect = question.answer.includes(index);
+            let optionClass = 'option';
+            
+            if (isSelected) {
+                optionClass += ' selected';
+                if (isAnswerChecked) {
+                    if (question.answer.includes(index)) {
+                        optionClass += ' correct';
+                    } else {
+                        optionClass += ' incorrect';
+                    }
+                }
+            } else if (isAnswerChecked && question.answer.includes(index)) {
+                optionClass += ' correct';
+            }
+            
+            // 判断题特殊处理选项前缀
+            let prefix = '';
+            if (question.type === 'judge') {
+                prefix = '';
+            } else {
+                prefix = `${String.fromCharCode(65 + index)}. `;
+            }
+            
+            html += `<div class="${optionClass}" data-index="${index}">${prefix}${option}</div>`;
+        });
+        
+        html += `</div>`;
+        
+        if (isAnswerChecked) {
+            html += `<div class="explanation show"><div class="explanation-title">解析</div>${question.explanation}</div>`;
+        } else {
+            html += `<div class="explanation"><div class="explanation-title">解析</div>${question.explanation}</div>`;
+        }
+        
+        questionContainer.innerHTML = html;
+        
+        // 更新按钮区域
+        updateButtonArea(question.type);
+        
+        // 添加选项点击事件
+        setTimeout(() => {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    if (isAnswerChecked) return;
+                    
+                    const index = parseInt(option.getAttribute('data-index'));
+                    const question = questions[currentQuestion];
+                    
+                    if (question.type === 'single' || question.type === 'judge') {
+                        selectedOptions = [index];
+                        isAnswerChecked = true;
+                        checkAnswer();
+                        displayQuestion();
+                    } else if (question.type === 'multiple') {
+                        if (selectedOptions.includes(index)) {
+                            selectedOptions = selectedOptions.filter(i => i !== index);
+                        } else {
+                            selectedOptions.push(index);
+                        }
+                        displayQuestion();
+                    }
+                });
+            });
+        }, 0);
+    }
+
+    // 更新按钮区域
+    function updateButtonArea(questionType) {
+        if (questionType === 'multiple' && !isAnswerChecked) {
+            btnContainer.innerHTML = `
+                <div class="btn-container multiple">
+                    <button class="btn confirm-btn" id="confirm-btn" ${selectedOptions.length === 0 ? 'disabled' : ''}>确定</button>
+                    <button class="btn" id="next-btn" disabled>下一题</button>
+                </div>
+            `;
+            
+            document.getElementById('confirm-btn')?.addEventListener('click', () => {
+                isAnswerChecked = true;
+                checkAnswer();
+                displayQuestion();
+            });
+        } else {
+            btnContainer.innerHTML = `
+                <div class="btn-container">
+                    <button class="btn" id="next-btn" ${!isAnswerChecked ? 'disabled' : ''}>下一题</button>
+                </div>
+            `;
+        }
+        
+        // 添加下一题按钮事件
+        const nextBtn = document.getElementById('next-btn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', goToNextQuestion);
+        }
+    }
+
+    // 检查答案
+    function checkAnswer() {
+        const question = questions[currentQuestion];
+        
+        if (question.type === 'multiple') {
+            // 多选题必须满足三个条件：
+            // 1. 用户选择了所有正确选项
+            // 2. 用户没有选择任何错误选项
+            // 3. 选择的数量与正确答案数量一致
+            const allCorrectSelected = question.answer.every(ans => 
+                selectedOptions.includes(ans)
+            );
+            const noIncorrectSelected = selectedOptions.every(opt => 
+                question.answer.includes(opt)
+            );
+            
+            // 只有完全匹配才得分
+            if (allCorrectSelected && noIncorrectSelected && 
+                selectedOptions.length === question.answer.length) {
+                score++;
+            }
+        } else {
+            // 单选或判断题
+            if (selectedOptions[0] === question.answer[0]) {
+                score++;
+            }
+        }
+        currentScoreDisplay.textContent = score;
+    }
+
+    // 跳转到下一题
+    function goToNextQuestion() {
+        selectedOptions = [];
+        isAnswerChecked = false;
+        currentQuestion++;
+        
+        if (currentQuestion < totalQuestions) {
+            displayQuestion();
+        } else {
+            // 测验完成
+            questionContainer.style.display = 'none';
+            btnContainer.style.display = 'none';
+            scoreDisplay.textContent = score;
+            totalDisplay.textContent = totalQuestions;
+            scoreContainer.classList.add('show');
+            progressBar.style.width = '100%';
+        }
+    }
+
+    // 重新开始测验
+    restartBtn.addEventListener('click', initQuiz);
+
+    // 页面加载完成后初始化
+    window.addEventListener('DOMContentLoaded', () => {
+        initQuiz();
+    });  
+</script>
+</body>
+</html>
